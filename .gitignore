@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pytest
+.pytest_cache/
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Environment variables
+.env
+
+# SQLite
+*.sqlite3
+
+# Local cache
+.cache/
+
+# Render
+.render/
+
+# Temporary files
+*.tmp
+
+# Optional large model caches
+huggingface/
+sentence_transformers/
