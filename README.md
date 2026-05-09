@@ -268,7 +268,7 @@ source venv/bin/activate
 
 ---
 
-# 3. Install Dependencies
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -276,7 +276,7 @@ pip install -r requirements.txt
 
 ---
 
-# 4. Build FAISS Index
+## 4. Build FAISS Index
 
 ```bash
 python app/retrieval/build_index.py
@@ -284,7 +284,7 @@ python app/retrieval/build_index.py
 
 ---
 
-# 5. Run FastAPI Server
+## 5. Run FastAPI Server
 
 ```bash
 uvicorn app.main:app --reload
@@ -292,7 +292,7 @@ uvicorn app.main:app --reload
 
 ---
 
-# 6. Open Swagger UI
+## 6. Open Swagger UI
 
 ```text
 http://127.0.0.1:8000/docs
