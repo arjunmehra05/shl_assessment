@@ -1,97 +1,98 @@
 # SHL Assessment Recommendation Agent
 
-A stateless conversational recommendation agent for SHL assessments built using FastAPI, FAISS, and Sentence Transformers.
+A stateless conversational recommendation system for SHL assessments built with FastAPI, FAISS, and semantic retrieval.
 
-The system recommends SHL Individual Test Solutions based on multi-turn conversational context, supports clarification and refinement flows, and performs grounded comparisons using catalog data only.
+## Overview
 
----
+This project implements an AI-powered recommendation agent that:
 
-# Features
+* Recommends relevant SHL assessments from the SHL product catalog
+* Handles multi-turn conversations using stateless conversation history
+* Clarifies vague hiring or assessment requirements before recommending
+* Supports refinement of recommendations when constraints change
+* Compares SHL assessments using grounded catalog information
+* Refuses off-topic or unsafe requests
 
-* Stateless conversational API
-* SHL catalog grounded retrieval
-* Multi-turn clarification and refinement
-* Assessment recommendation (1–10 items)
-* Comparison support (e.g. OPQ vs GSA)
-* Prompt injection and off-topic refusal
-* FAISS vector search + reranking
-* FastAPI deployment-ready architecture
+The system is optimized for evaluator stability, low hallucination risk, deterministic behavior, and schema compliance.
 
 ---
 
-# Architecture
+## Features
+
+### Conversational Behaviors
+
+* Clarification for vague queries
+* Assessment recommendation (1–10 recommendations)
+* Recommendation refinement
+* Grounded comparison between assessments
+* Off-topic refusal and prompt-injection resistance
+
+### Retrieval Pipeline
+
+* FAISS vector similarity search
+* Sentence-transformer semantic embeddings
+* Lightweight deterministic reranking
+* Intent-aware ranking boosts
+* Leadership vs cognitive balancing
+
+### Deployment
+
+* FastAPI backend
+* Stateless API design
+* Render deployment ready
+* Swagger/OpenAPI support
+
+---
+
+## Tech Stack
+
+| Component     | Technology            |
+| ------------- | --------------------- |
+| API Framework | FastAPI               |
+| Vector Search | FAISS                 |
+| Embeddings    | sentence-transformers |
+| Language      | Python 3.10           |
+| Deployment    | Render                |
+| Validation    | Pydantic              |
+
+---
+
+## Project Structure
 
 ```text
-User
-  ↓
-FastAPI API Layer
-  ↓
-Conversation Orchestrator
-  ↓
-Retriever
-  ↓
-FAISS Vector Search
-  ↓
-Rule-based Reranker
-  ↓
-Structured Response Formatter
-```
-
----
-
-# Tech Stack
-
-* Python 3.10+
-* FastAPI
-* FAISS
-* Sentence Transformers
-* Uvicorn
-* Pydantic
-
----
-
-# Project Structure
-
-```text
-backend/
+shl_assessment/
 │
-├── app/
-│   ├── main.py
+├── backend/
+│   ├── app/
+│   │   ├── evaluation/
+│   │   ├── models/
+│   │   ├── retrieval/
+│   │   ├── services/
+│   │   └── main.py
 │   │
-│   ├── models/
-│   │   └── schemas.py
+│   ├── data/
+│   │   ├── catalog.json
+│   │   ├── faiss.index
+│   │   └── metadata.pkl
 │   │
-│   ├── retrieval/
-│   │   ├── build_index.py
-│   │   ├── retriever.py
-│   │   ├── reranker.py
-│   │   └── intent_detector.py
-│   │
-│   ├── services/
-│   │   ├── orchestrator.py
-│   │   ├── comparison.py
-│   │   ├── normalize_catalog.py
-│   │   └── test_type_mapper.py
-│   │
-│   └── evaluation/
-│       └── test_queries.py
+│   └── requirements.txt
 │
-├── data/
-│   ├── faiss.index
-│   ├── metadata.pkl
-│   └── raw/
-│
-├── requirements.txt
+├── render.yaml
+├── runtime.txt
+├── .python-version
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-# API Endpoints
+## API Endpoints
 
-## Health Check
+### Health Check
 
-### GET `/health`
+```http
+GET /health
+```
 
 Response:
 
@@ -103,9 +104,11 @@ Response:
 
 ---
 
-## Chat Endpoint
+### Chat Endpoint
 
-### POST `/chat`
+```http
+POST /chat
+```
 
 Request:
 
@@ -114,25 +117,13 @@ Request:
   "messages": [
     {
       "role": "user",
-      "content": "We need a solution for senior leadership"
+      "content": "Executive leadership benchmark"
     }
   ]
 }
 ```
 
 Response:
-
-```json
-{
-  "reply": "Could you share more about the role, seniority level, and whether you need technical, cognitive, or personality assessments?",
-  "recommendations": [],
-  "end_of_conversation": false
-}
-```
-
----
-
-# Recommendation Response Example
 
 ```json
 {
@@ -150,149 +141,55 @@ Response:
 
 ---
 
-# Test Type Mapping
+## Local Setup
 
-| Code | Category               |
-| ---- | ---------------------- |
-| P    | Personality & Behavior |
-| K    | Knowledge & Skills     |
-| A    | Ability & Aptitude     |
-| C    | Competencies           |
-| D    | Development & 360      |
-
----
-
-# Retrieval Pipeline
-
-## 1. Query Understanding
-
-The orchestrator analyzes:
-
-* leadership intent
-* technical intent
-* cognitive intent
-* personality intent
-* comparison intent
-* refinement intent
-
----
-
-## 2. Semantic Retrieval
-
-Sentence Transformer embeddings are used with FAISS vector search to retrieve relevant SHL assessments.
-
-Model used:
-
-```text
-all-MiniLM-L6-v2
-```
-
----
-
-## 3. Reranking
-
-A lightweight deterministic reranker adjusts scores using:
-
-* lexical overlap
-* category alignment
-* leadership vs cognitive intent
-* technical keyword matching
-* assessment type weighting
-
-This improves ranking precision while keeping behavior deterministic and evaluator-stable.
-
----
-
-# Comparison Support
-
-The system supports grounded catalog comparisons such as:
-
-```text
-Compare OPQ and GSA
-What is the difference between OPQ32r and GSA?
-```
-
-Comparisons are generated only from catalog metadata and retrieved assessment entries.
-
----
-
-# Clarification & Refinement
-
-The agent:
-
-* asks clarification questions for vague requests
-* refines recommendations when constraints change
-* reconstructs conversation state from full message history
-
-No server-side session memory is used.
-
----
-
-# Safety & Scope Control
-
-The system:
-
-* refuses off-topic requests
-* blocks prompt injection attempts
-* only recommends SHL catalog assessments
-* never generates external URLs
-
----
-
-# Local Setup
-
-## 1. Clone Repository
+### 1. Clone Repository
 
 ```bash
-git clone <your_repo_url>
-cd backend
+git clone https://github.com/<your-username>/shl_assessment.git
+cd shl_assessment
 ```
 
----
-
-## 2. Create Virtual Environment
-
-### Windows
+### 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
+```
+
+Activate environment:
+
+#### Windows
+
+```bash
 venv\Scripts\activate
 ```
 
-### Mac/Linux
+#### macOS/Linux
 
 ```bash
-python3 -m venv venv
 source venv/bin/activate
 ```
 
----
-
-## 3. Install Dependencies
+### 3. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
----
-
-## 4. Build FAISS Index
+### 4. Run Application
 
 ```bash
-python app/retrieval/build_index.py
-```
-
----
-
-## 5. Run FastAPI Server
-
-```bash
+cd backend
 uvicorn app.main:app --reload
 ```
 
----
+Application runs at:
 
-## 6. Open Swagger UI
+```text
+http://127.0.0.1:8000
+```
+
+Swagger Docs:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -300,52 +197,108 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# Evaluation
+## Deployment
 
-The system was tested against:
+This project is configured for deployment on Render.
 
-* vague query clarification
-* leadership recommendation flows
-* technical hiring scenarios
-* refinement conversations
-* grounded comparison prompts
-* prompt injection attempts
-* off-topic refusal cases
+### Build Command
 
----
+```bash
+pip install -r backend/requirements.txt
+```
 
-# Design Decisions
+### Start Command
 
-* Deterministic orchestration was preferred over LLM routing for:
-
-  * lower latency
-  * evaluator stability
-  * reduced hallucination risk
-  * predictable schema compliance
-
-* Retrieval quality was prioritized using:
-
-  * FAISS semantic search
-  * lightweight reranking
-  * category-aware intent weighting
-
-* The API is fully stateless:
-
-  * every `/chat` request contains complete conversation history
-  * no server-side conversation memory is stored
+```bash
+cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
 
 ---
 
-# Future Improvements
+## Retrieval Design
 
-* Hybrid BM25 + vector retrieval
-* Better comparison summarization
-* Improved leadership ranking precision
-* Expanded evaluation harness
-* Optional frontend UI
+### Semantic Retrieval
+
+The system uses sentence-transformer embeddings with FAISS vector search to retrieve semantically relevant SHL assessments.
+
+### Deterministic Reranking
+
+A lightweight reranker adjusts ranking using:
+
+* lexical overlap
+* detected intents
+* job levels
+* category relevance
+* leadership weighting
+* cognitive weighting
+
+This keeps the system:
+
+* deterministic
+* evaluator-stable
+* low latency
+* low hallucination
 
 ---
 
-# License
+## Supported Assessment Categories
 
-This project was built for the SHL AI Internship Assignment.
+* Personality & Behavior
+* Ability & Aptitude
+* Knowledge & Skills
+* Competencies
+* Development & 360
+
+---
+
+## Example Queries
+
+### Leadership
+
+```text
+Executive leadership benchmark
+```
+
+### Technical Hiring
+
+```text
+Java backend developer assessment
+```
+
+### Cognitive Assessment
+
+```text
+Graduate aptitude screening
+```
+
+### Comparison
+
+```text
+What is the difference between OPQ and GSA?
+```
+
+---
+
+## Notes
+
+* The API is fully stateless.
+* Every `/chat` request contains the full conversation history.
+* No conversation state is stored server-side.
+* All recommendations are grounded in the SHL catalog.
+* Returned URLs originate from catalog data only.
+
+---
+
+## Public Deployment
+
+Production URL:
+
+```text
+https://shl-assessment-agent-z5nt.onrender.com
+```
+
+---
+
+## Author
+
+Arjun Mehra
